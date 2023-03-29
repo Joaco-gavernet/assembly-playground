@@ -2,7 +2,8 @@ ORG 2000H
 MOV AL, 15
 MOV BL, 10
 CMP AL, BL
-JS UPDATEA ;checks if (A < B)
+JS UPDATEA ;checks if (A <= B)
+;JZ UPDATEA ;to add if you want to include the case where (A == B)
 JMP UPDATEB 
 UPDATEA: MOV CL, AL ;case true
 JMP FIN
