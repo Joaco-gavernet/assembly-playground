@@ -1,0 +1,88 @@
+
+PIC EQU 20H
+EOI EQU 20H
+IMR EQU 21H
+INT0 EQU 24H
+INT1 EQU 25H
+TIMER_CONT EQU 10H
+TIMER_COMP EQU 11H
+
+N_F10 EQU 10
+N_CLOCK EQU 11
+
+ORG 40
+IP_F10 DW RUT_F10
+
+ORG 44
+IP_CLOCK DW RUT_CLOCK
+
+ORG 1000H
+MSJ DB "Ingrese numero para cuenta regresiva: "
+FIN_MSJ DB ?
+NUM DB ?
+SPACE DB " "
+
+
+ORG 3000H
+; Imprimo mensaje inicial
+IMPRIMIR: MOV BX, OFFSET MSJ
+MOV AL, OFFSET FIN_MSJ - OFFSET MSJ
+INT 7
+RET
+
+
+RUT_F10: CLI
+PUSH AX
+MOV AL, 11111101B
+OUT IMR, AL
+MOV AL, EOI
+OUT EOI, AL
+POP AX
+STI
+IRET
+
+
+RUT_CLOCK: PUSH AX
+INT 7
+DEC NUM
+CMP NUM, 2FH
+JZ FIN
+MOV AL, 0
+OUT TIMER_CONT, AL
+FIN: MOV AL, EOI
+OUT EOI, AL
+POP AX
+IRET
+
+ORG 2000H
+CALL IMPRIMIR
+
+; Seteo direccion de almacenamiento del numero a leer
+MOV BX, OFFSET NUM
+INT 6
+
+CLI
+; Configuro dispositivos internos para interrupciones
+MOV AL, 11111110B ; Habilito unicamente las interrupciones N_F10
+OUT IMR, AL
+
+; Seteo rutina de gestion para F10 (ID = 10)
+MOV AL, N_F10
+OUT INT0, AL
+
+; Seteo rutina de gestion para TIMER (ID = 11)
+MOV AL, N_CLOCK
+OUT INT1, AL
+MOV AL, 0
+OUT TIMER_CONT, AL
+MOV AL, 1
+OUT TIMER_COMP, AL
+
+MOV BX, OFFSET NUM
+MOV AL, 2
+STI
+
+LOOP: JMP LOOP
+
+INT 0
+END
