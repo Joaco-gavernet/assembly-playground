@@ -18,7 +18,7 @@ ORG 1000H
 SEGS DB 0
 SENTIDO DB 1
 TABLA DB 1, 2, 4, 8, 16, 32, 64, 128
-FIN_TABLA DB ?
+i DB 1
 
 ORG 3000H
 RUT_CLOCK: INC SEGS
@@ -30,13 +30,15 @@ CMP SENTIDO, 1
 JS RETORNA
 
 INC BX
-CMP BX, OFFSET FIN_TABLA ; Verifico si llegue al final de la tabla
+INC i
+CMP i, 8 ; Verifico si llegue al final de la tabla
 JNZ OK
 MOV SENTIDO, 0
 OK: JMP LUCES
 
 RETORNA: DEC BX
-CMP BX, OFFSET TABLA ; Verifico si es el inicio de la tabla
+DEC i
+CMP i, 1 ; Verifico si es el inicio de la tabla
 JNZ LUCES
 MOV SENTIDO, 1
 
