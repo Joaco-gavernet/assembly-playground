@@ -1,0 +1,103 @@
+
+PIC EQU 20H
+EOI EQU 20H
+IMR EQU 21H
+INT0 EQU 24H
+N_F10 EQU 10
+
+PA EQU 30H
+PB EQU 31H
+CA EQU 32H
+CB EQU 33H
+
+
+ORG 40
+IP_F10 DW RUT_F10
+
+ORG 1000H
+MSJ DB "Ingrese caracteres a imprimir: "
+FIN_MSJ DB ?
+CHAR DB ?
+FIN DB 1
+
+ORG 3000H
+
+PRINT: MOV BX, OFFSET MSJ
+MOV AX, OFFSET FIN_MSJ - OFFSET MSJ
+INT 7
+RET
+
+; Envio char a impresora
+ENVIAR_CHAR: PUSH AX
+MOV AL, [BX]
+OUT PB, AL
+POP AX
+RET
+
+
+; Envio pulso via STROBE
+PULSO: PUSH AX
+IN AL, PA
+OR AL, 2
+OUT PA, AL
+IN AL, PA
+AND AL, 1111101b
+OUT PA, AL
+POP AX
+RET
+
+
+RUT_F10: MOV FIN, 0
+
+MOV AL, EOI
+OUT EOI, AL
+IRET
+
+
+ORG 2000H
+; Configuracion del PIC para F10
+MOV AL, 11111110b
+OUT IMR, AL
+MOV AL, N_F10
+OUT INT0, AL
+
+; Configuracion de PIO para impresora
+MOV AL, 11111101b
+OUT CA, AL
+MOV AL, 0
+OUT CB, AL
+
+
+CALL PRINT
+MOV CL, 0 ; Seteo contador de caracteres leidos
+MOV DL, 1 ; Condicion para seguir leyendo (todavia no se apreto F10)
+MOV BX, OFFSET CHAR
+
+; Registro caracter ingresado
+LOOP: NOP
+ INT 6
+ INC BX 
+ INC CL
+ CMP FIN, 0
+ JNZ LOOP
+ 
+ MOV BX, OFFSET CHAR
+ 
+PRINTING: NOP
+ CALL ENVIAR_CHAR
+ CALL PULSO
+ INC BX
+ DEC CL
+ JNZ PRINTING
+
+INFINITO: JMP INFINITO
+
+INT 0
+END
+
+
+
+
+
+
+

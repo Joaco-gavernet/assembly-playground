@@ -1,0 +1,71 @@
+
+
+PA EQU 30H
+PB EQU 31H
+CA EQU 32H
+CB EQU 33H
+
+ORG 1000H
+MSJ DB "Ingrese 5 caracteres a imprimir: "
+FIN_MSJ DB ?
+CHAR DB ?
+
+ORG 3000H
+
+PRINT: MOV BX, OFFSET MSJ
+MOV AX, OFFSET FIN_MSJ - OFFSET MSJ
+INT 7
+RET
+
+; Envio char a impresora
+ENVIAR_CHAR: PUSH AX
+MOV AL, CHAR
+OUT PB, AL
+POP AX
+RET
+
+
+; Envio pulso via STROBE
+PULSO: PUSH AX
+IN AL, PA
+OR AL, 2
+OUT PA, AL
+IN AL, PA
+AND AL, 1111101b
+OUT PA, AL
+POP AX
+RET
+
+
+ORG 2000H
+; Configuracion de PIO para impresora
+MOV AL, 11111101b
+OUT CA, AL
+MOV AL, 0
+OUT CB, AL
+
+
+MOV CL, 5 ; Seteo contador de caracteres leidos
+CALL PRINT
+
+; Registro caracter ingresado
+LOOP: NOP
+ MOV BX, OFFSET CHAR
+ INT 6
+ CALL ENVIAR_CHAR
+ CALL PULSO
+ DEC CL
+ JNZ LOOP
+
+
+INFINITO: JMP INFINITO
+
+INT 0
+END
+
+
+
+
+
+
+
