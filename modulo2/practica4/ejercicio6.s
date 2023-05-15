@@ -8,26 +8,18 @@ D: .word 0
 ld r1, A(r0)
 ld r2, B(r0)
 ld r3, C(r0)
-daddi r4, r0, 0
+daddi r4, r0, 0 ;inicializo registro en 0
 
-xor r5, r1, r2
-bnez r5, next1
-daddi r4, r4, 2
+bne r1, r2, next1
+daddi r4, r4, 1
+next1: bne r1, r3, next2
+daddi r4, r4, 1
+next2: bne r2, r3, check
+daddi r4, r4, 1
 
-next1: xor r5, r1, r3
-bnez r5, next2
-bnez r4, inc
-daddi r4, r4, 2
-j next2
-inc: daddi r4, r4, 1
-
-next2: xor r5, r2, r3
-bnez r5, fin
-bnez r4, inc2
-daddi r4, r4, 2
-j fin
-inc2: daddi r4, r4, 1
-
+check: daddi r5, r0, 1
+beq r0, r0, fin
+daddi r4, r0, 2
 fin: sd r4, D(r0)
 
 halt
