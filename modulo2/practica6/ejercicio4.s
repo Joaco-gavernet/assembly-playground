@@ -15,7 +15,8 @@ restart: nop
 daddi $s3, $zero, 4 ; contador inicializado en 4 (caracteres por leer)
 daddi $s4, $zero, 0 ; contador de la direccion de almacenamiento (caracteres leidos)
 
-jal printMsj
+daddi $a0, $0, msj
+jal print
 
 loop: jal char ; se solicita ingreso (caracter por caracter)
   sb $v0, ingresado($s4) ; almacenamiento del caracter en "ingresado"
@@ -36,16 +37,6 @@ sonIguales: daddi $a0, $0, bienvenido
 jal print
 
 halt
-
-printMsj: daddi $t0, $0, 6 ; funcion 6 (limpiar pantalla)
-  sd $t0, 0($s0) ; se ejecuta
-
-  daddi $t0, $0, 4 ; funcion 4 (salida de cadena ASCII)
-  daddi $t1, $0, msj ; obtengo en $t1 direccion del mensaje a mostrar
-  sd $t1, 0($s1) ; almaceno direccion en DATA
-  sd $t0, 0($s0) ; se ejecuta
-
-  jr $ra
 
 char: daddi $t0, $0, 9 ; funcion 9 (lectura de caracter)
   sd $t0, 0($s0) ; se ejecuta
